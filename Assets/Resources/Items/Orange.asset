@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdd5113e78b96694da8b55f0ed76f76c, type: 3}
   m_Name: Orange
   m_EditorClassIdentifier: 
-  value: 15
+  value: 3
   sprite: {fileID: 21300000, guid: 5b0c287fddf11b24d910a6b285ee1807, type: 3}
