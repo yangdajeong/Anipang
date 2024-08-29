@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,8 +16,8 @@ public sealed class Tile : MonoBehaviour
 
         set
         {
-            if(_item == value)
-                return;  
+            if (_item == value)
+                return;
 
             _item = value;
 
@@ -29,7 +29,8 @@ public sealed class Tile : MonoBehaviour
 
     public Button button;
 
-    public Tile Left => x > 0 ?  Board.Instance.Tiles[x - 1, y] : null;
+    
+    public Tile Left => x > 0 ? Board.Instance.Tiles[x - 1, y] : null;
     public Tile Top => y > 0 ? Board.Instance.Tiles[x, y - 1] : null;
     public Tile Right => x < Board.Instance.Width - 1 ? Board.Instance.Tiles[x + 1, y] : null;
     public Tile Botton => y < Board.Instance.Height - 1 ? Board.Instance.Tiles[x, y + 1] : null;
@@ -42,12 +43,20 @@ public sealed class Tile : MonoBehaviour
         Botton
     };
 
-    private void Start() => button.onClick.AddListener(call: () => Board.Instance.Select(tile: this));   
-    
+    //public Tile[] Neighbours => new[]
+    //{
+    //    x > 0 ? Board.Instance.Tiles[x - 1, y] : null,
+    //    y > 0 ? Board.Instance.Tiles[x, y - 1] : null,
+    //    x < Board.Instance.Width - 1 ? Board.Instance.Tiles[x + 1, y] : null,
+    //    y < Board.Instance.Height - 1 ? Board.Instance.Tiles[x, y + 1] : null
+    //};
+
+    private void Start() => button.onClick.AddListener(call: () => Board.Instance.Select(tile: this));
+
     public List<Tile> GetConnectedTiles(List<Tile> exclude = null)
     {
         var result = new List<Tile> { this, };
-        
+
         if (exclude == null)
         {
             exclude = new List<Tile> { this, };

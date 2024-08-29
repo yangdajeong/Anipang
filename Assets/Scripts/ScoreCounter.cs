@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -18,9 +16,7 @@ public sealed class ScoreCounter : MonoBehaviour
             if (_score == value) return;
 
             _score = value;
-
-            //scoreText.SetText($"Score = {_score}"); 
-            scoreText.text = _score.ToString(); 
+            scoreText.text = _score.ToString();
         }
     }
 
@@ -28,6 +24,6 @@ public sealed class ScoreCounter : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;    
+        Instance = this;
     }
 }

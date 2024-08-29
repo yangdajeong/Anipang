@@ -14,22 +14,22 @@ public sealed class Board : MonoBehaviour
 
     [SerializeField] private AudioSource audioSource;
 
+    [SerializeField] Image twinBlock;
+
     public Row[] rows;
 
     public Tile[,] Tiles { get; private set; }
 
-    private List<Button> buttons;
+    public List<Button> buttons;
 
     public int Width => Tiles.GetLength(dimension: 0);
     public int Height => Tiles.GetLength(dimension: 1);
 
-    private readonly List<Tile> _selection = new List<Tile>();
+    public  List<Tile> _selection = new List<Tile>();
 
     private const float TweenDuration = 0.25f;
 
     private void Awake() => Instance = this;
-
-    private bool popping;
 
     private void Start()
     {
@@ -52,35 +52,43 @@ public sealed class Board : MonoBehaviour
 
         Pop();
 
-        for (int i = 0; i < Tiles.Length; i++)
+        for (int i = 0; i < Tiles.GetLength(0); i++)
         {
-            buttons.Add(Tiles[i, 0].button);
-            
+            for (int j = 0; j < Tiles.GetLength(1); j++)
+            {
+                Button button = Tiles[i, j].GetComponent<Button>(); // Tile에서 Button 컴포넌트 가져오기
+                buttons.Add(button);
+            }
         }
     }
 
     public async void Select(Tile tile)
     {
-        NotButtonClick();
-
         if (!_selection.Contains(tile))
         {
-            if (_selection.Count > 0)
+            if (_selection.Count > 0) //두번째 선택
             {
-                if (Array.IndexOf(_selection[0].Neighbours, tile) != -1)
+                if (Array.IndexOf(_selection[0].Neighbours, tile) != -1) //첫번째 선택한 타일에서 십자가 안에 이웃이 있으면 add
                 {
+                    _selection.Add(tile);
+                }
+                else //아니라면 초기화
+                {
+                    _selection.Clear();
                     _selection.Add(tile);
                 }
             }
             else
             {
-                _selection.Add(tile);
+                _selection.Add(tile); //첫번째 선택
             }
         }
 
         if (_selection.Count < 2) return;
 
         Debug.Log(message: $"Selected tiles at ({_selection[0].x}, {_selection[0].y}) and ({_selection[1].x}, {_selection[1].y})");
+
+        twinBlock.enabled = true;
 
         await Swap(_selection[0], _selection[1]);
 
@@ -91,6 +99,7 @@ public sealed class Board : MonoBehaviour
         else
         {
             await Swap(_selection[0], _selection[1]);
+            twinBlock.enabled = false;
         }
 
         _selection.Clear();
@@ -136,8 +145,6 @@ public sealed class Board : MonoBehaviour
 
     private async void Pop()
     {
-        popping = true;
-
         for (var y = 0; y < Height; y++)
         {
             for (var x = 0; x < Width; x++)
@@ -159,6 +166,8 @@ public sealed class Board : MonoBehaviour
 
                 ScoreCounter.Instance.Score += tile.Item.value * connectedTiles.Count;
 
+                twinBlock.enabled = true;
+
                 await deflateSequence.Play()
                                     .AsyncWaitForCompletion();
                 
@@ -177,19 +186,18 @@ public sealed class Board : MonoBehaviour
                 x = 0;
                 y = 0;
 
-                popping = false;
+                twinBlock.enabled = false;
             }
         }
     }
 
-    private void NotButtonClick()
+    public void pause()
     {
-        if (popping)
-        {
-            for (int i = 0; i < buttons.Count; i++)
-            {
-                buttons[i].interactable = false;
-            }
-        }
+        Time.timeScale = 0;  
+    }
+
+    public void play()
+    {
+        Time.timeScale = 1;
     }
 }
