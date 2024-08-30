@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class Board : MonoBehaviour
+public sealed class Board : MonoBehaviour //Seaded (봉인된) 더이상 상속이 불가능
 {
     public static Board Instance { get; private set; }
 
@@ -25,7 +25,7 @@ public sealed class Board : MonoBehaviour
     public int Width => Tiles.GetLength(dimension: 0);
     public int Height => Tiles.GetLength(dimension: 1);
 
-    public  List<Tile> _selection = new List<Tile>();
+    private List<Tile> _selection = new List<Tile>();
 
     private const float TweenDuration = 0.25f;
 
@@ -33,7 +33,7 @@ public sealed class Board : MonoBehaviour
 
     private void Start()
     {
-        Tiles = new Tile[rows.Max(selector: row => row.tiles.Length), rows.Length];
+        Tiles = new Tile[rows.Max(selector: row => row.tiles.Length), rows.Length]; // 타일 배열 초기화
 
         for (var y = 0; y < Height; y++)
         {
@@ -44,11 +44,12 @@ public sealed class Board : MonoBehaviour
                 tile.x = x;
                 tile.y = y;
 
-                tile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];
+                tile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];  
 
                 Tiles[x, y] = rows[y].tiles[x];
             }
         }
+        //for문을 다 돌면서 하나씩 빈칸 채워넣기
 
         Pop();
 
@@ -62,7 +63,7 @@ public sealed class Board : MonoBehaviour
         }
     }
 
-    public async void Select(Tile tile)
+    public async void Select(Tile tile) // 두개의 타일 선택 
     {
         if (!_selection.Contains(tile))
         {
@@ -72,7 +73,7 @@ public sealed class Board : MonoBehaviour
                 {
                     _selection.Add(tile);
                 }
-                else //아니라면 초기화
+                else //아니라면 초기화 및 천번째 타일 선택 (첫 타일 선택 후 잊고 다른 타일을 첫번째로 착각했을 시 주변이 안눌리는 문제 방지)
                 {
                     _selection.Clear();
                     _selection.Add(tile);
@@ -86,28 +87,28 @@ public sealed class Board : MonoBehaviour
 
         if (_selection.Count < 2) return;
 
-        Debug.Log(message: $"Selected tiles at ({_selection[0].x}, {_selection[0].y}) and ({_selection[1].x}, {_selection[1].y})");
+        Debug.Log($"Selected tiles at ({_selection[0].x}, {_selection[0].y}) and ({_selection[1].x}, {_selection[1].y})");
 
-        twinBlock.enabled = true;
+        twinBlock.enabled = true; //스왑일 때는 터치 못하게 막기
 
-        await Swap(_selection[0], _selection[1]);
+        await Swap(_selection[0], _selection[1]); //선택한 타일 두개 서로 바꾸기
 
-        if (CanPop())
+        if (CanPop()) //팝할 수 있다
         {
             Pop();
         }
-        else
+        else //팝할 수 없다
         {
-            await Swap(_selection[0], _selection[1]);
-            twinBlock.enabled = false;
+            await Swap(_selection[0], _selection[1]); //원위치로 되돌기
+            twinBlock.enabled = false; // 선택 가능하게 하기
         }
 
-        _selection.Clear();
+        _selection.Clear(); //선택한 타일 없애기
     }
 
-    public async Task Swap(Tile tile1, Tile tile2)
+    public async Task Swap(Tile tile1, Tile tile2) // 아이템 서로 바꾸기
     {
-        var icon1 = tile1.icon;
+        var icon1 = tile1.icon; 
         var icon2 = tile2.icon;
 
         var icon1Transform = icon1.transform;
@@ -119,21 +120,21 @@ public sealed class Board : MonoBehaviour
                 .Join(icon2Transform.DOMove(icon1Transform.position, TweenDuration));
 
         await sequence.Play()
-                    .AsyncWaitForCompletion();
+                    .AsyncWaitForCompletion(); //애니메이션을 실행하고, 그 애니메이션이 완료될 때까지 비동기적으로 대기하는 코드
 
         icon1Transform.SetParent(tile2.transform);
         icon2Transform.SetParent(tile1.transform);
 
-        tile1.icon = icon2;
+        tile1.icon = icon2; //아이템 이미지 바꾸기
         tile2.icon = icon1;
 
         var tile1Item = tile1.Item;
 
-        tile1.Item = tile2.Item;
+        tile1.Item = tile2.Item; //아이템 바꿔주기
         tile2.Item = tile1Item;
     }
 
-    private bool CanPop()
+    private bool CanPop() //팝할 수 있다.
     {
         for (var y = 0; y < Height; y++)
             for (var x = 0; x < Width; x++)
@@ -143,7 +144,7 @@ public sealed class Board : MonoBehaviour
         return false;
     }
 
-    private async void Pop()
+    private async void Pop() //터트리기
     {
         for (var y = 0; y < Height; y++)
         {
@@ -157,27 +158,27 @@ public sealed class Board : MonoBehaviour
 
                 var deflateSequence = DOTween.Sequence();
 
-                foreach(var connectedTile in connectedTiles)
+                foreach (var connectedTile in connectedTiles)
                 {
-                    deflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.zero, TweenDuration));
+                    deflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.zero, TweenDuration)); //크기 줄이기
                 }
 
                 audioSource.PlayOneShot(collectSound);
 
-                ScoreCounter.Instance.Score += tile.Item.value * connectedTiles.Count;
+                ScoreCounter.Instance.Score += tile.Item.value * connectedTiles.Count; // 점수 올리기
 
-                twinBlock.enabled = true;
+                twinBlock.enabled = true; 
 
                 await deflateSequence.Play()
                                     .AsyncWaitForCompletion();
-                
-                var inflateSequence = DOTween.Sequence();   
 
-                foreach(var connectedTile in connectedTiles)
+                var inflateSequence = DOTween.Sequence();
+
+                foreach (var connectedTile in connectedTiles)
                 {
-                    connectedTile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];
-                
-                    inflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.one, TweenDuration)); 
+                    connectedTile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)]; //없어진 자리 다시 랜덤 과일 생기게 하기
+
+                    inflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.one, TweenDuration));
                 }
 
                 await inflateSequence.Play()
@@ -193,7 +194,7 @@ public sealed class Board : MonoBehaviour
 
     public void pause()
     {
-        Time.timeScale = 0;  
+        Time.timeScale = 0;
     }
 
     public void play()

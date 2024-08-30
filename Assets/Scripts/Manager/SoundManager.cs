@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
@@ -10,10 +8,10 @@ public class SoundManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null ) 
+        if (instance == null)
         {
-            instance = this;    
-            DontDestroyOnLoad(gameObject);  
+            instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
