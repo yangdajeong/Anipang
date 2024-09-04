@@ -22,8 +22,8 @@ public sealed class Board : MonoBehaviour //Seaded (봉인된) 더이상 상속이 불가능
 
     public List<Button> buttons;
 
-    public int Width => Tiles.GetLength(dimension: 0);
-    public int Height => Tiles.GetLength(dimension: 1);
+    public int Width => Tiles.GetLength(dimension: 0); // x
+    public int Height => Tiles.GetLength(dimension: 1); // y
 
     private List<Tile> _selection = new List<Tile>();
 
@@ -63,7 +63,7 @@ public sealed class Board : MonoBehaviour //Seaded (봉인된) 더이상 상속이 불가능
         }
     }
 
-    public async void Select(Tile tile) // 두개의 타일 선택 
+    public async void Select(Tile tile) // 두개의 타일 선택   // async void : 예외 처리와 결과 반환에서 제약이 있기 때문에, 일반적으로 async Task 또는 async Task<T>를 사용하는 것이 좋음.
     {
         if (!_selection.Contains(tile))
         {
